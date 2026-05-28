@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PoolStatus {
+  FILLING
+  READY_TO_BUY
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  OWNER
+  SUPPORT
+}
+
+model User {
+  id          String        @id @default(cuid())
+  telegramId  String        @unique
+  firstName   String?
+  username    String?
+  createdAt   DateTime      @default(now())
+
+  memberships Membership[]
+  reservations Reservation[]
+  role UserRole @default(USER)
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  codePrefix String?
+  description String?
+  price       Int
+  capacity    Int
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  pools       Pool[]
+  reservations Reservation[]
+}
+
+model Pool {
+  id             String          @id @default(cuid())
+  code String? @unique
+  
+  title          String
+  status         PoolStatus      @default(FILLING)
+
+  email          String?
+  password       String?
+
+  currentMembers Int             @default(0)
+
+  startsAt       DateTime?
+  expiresAt      DateTime?
+
+  createdAt      DateTime        @default(now())
+
+  productId      String
+  product        Product         @relation(fields: [productId], references: [id])
+
+  memberships    Membership[]
+  reservations Reservation[]
+}
+
+model Membership {
+  id          String              @id @default(cuid())
+
+  status      MembershipStatus    @default(PENDING)
+
+  joinedAt    DateTime            @default(now())
+
+  userId      String
+  poolId      String
+
+  user        User                @relation(fields: [userId], references: [id])
+  pool        Pool                @relation(fields: [poolId], references: [id])
+}
+
+model Reservation {
+  id          String              @id @default(cuid())
+
+  status      ReservationStatus   @default(PENDING)
+
+  quantity Int @default(1)
+
+
+  createdAt   DateTime            @default(now())
+
+  userId      String
+  productId   String
+  poolId      String?
+
+  user         User      @relation(fields: [userId], references: [id])
+  product      Product   @relation(fields: [productId], references: [id])
+  pool         Pool?     @relation(fields: [poolId], references: [id])
+
+}
