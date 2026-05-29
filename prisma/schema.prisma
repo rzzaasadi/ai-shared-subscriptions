@@ -59,6 +59,8 @@ model Product {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
+  payments Payment[]
+
   pools        Pool[]
   reservations Reservation[]
 }
@@ -130,10 +132,15 @@ model Payment {
   status    String @default("PENDING")
 
   userId        String
-  reservationId String
+  reservationId String?
+
+  productId String
+  quantity  Int
 
   createdAt DateTime @default(now())
 
-  user        User        @relation(fields: [userId], references: [id])
-  reservation Reservation @relation(fields: [reservationId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+  reservation Reservation? @relation(fields: [reservationId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
 }

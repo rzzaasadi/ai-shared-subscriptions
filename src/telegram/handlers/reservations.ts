@@ -44,7 +44,7 @@ export async function handleSeatSelection(
       });
 
     if (!product) return;
-
+    /*
     const result =
       await createReservation({
         telegramId: ctx.from.id.toString(),
@@ -53,48 +53,39 @@ export async function handleSeatSelection(
         productId: product.id,
         quantity,
       });
+*/
+    userSessions.set(ctx.from.id, {
+  action: 'PAYMENT_CONFIRM',
+  productId: product.id,
+  quantity,
+});
 
-    userSessions.delete(ctx.from.id);
-
-    if (result.totalSeats >= product.capacity) {
-
-      await notifyAdminsPoolReady(
-        bot,
-        {
-          poolId: result.pool.id,
-          poolCode: result.pool.code,
-          productName: product.name,
-          totalSeats: result.totalSeats,
-          capacity: product.capacity,
-        }
-      );
-
-    }
-
-    await ctx.reply(
-      `✅ رزرو شما ثبت شد
-
-🧩 گروه: ${result.pool.code}
+await ctx.reply(
+  `🎬 ${product.name}
 
 🪑 تعداد سیت: ${quantity}
-👥 ظرفیت گروه: ${result.totalSeats}/${product.capacity}
 
 💰 مبلغ کل:
 ${(product.price * quantity).toLocaleString()} تومان
 
-${
-  result.totalSeats >= product.capacity
-    ? '🔥 ظرفیت گروه تکمیل شد و به زودی فعال می‌شود.'
-    : `⏳ ${
-        product.capacity - result.totalSeats
-      } ظرفیت دیگر باقی مانده است.`
-}`,
-      Markup.keyboard([
-        ['🛒 خرید اشتراک AI'],
-        ['📦 اشتراک‌های من', '📡 وضعیت سرویس‌ها'],
-        ['🛟 پشتیبانی'],
-      ]).resize()
-    );
+آیا مایل به ادامه پرداخت هستید؟`,
+  Markup.inlineKeyboard([
+    [
+      Markup.button.callback(
+        '✅ پرداخت',
+        'start_payment'
+      ),
+    ],
+    [
+      Markup.button.callback(
+        '❌ لغو',
+        'cancel_payment'
+      ),
+    ],
+  ])
+);
+
+return;
 
   } finally {
 

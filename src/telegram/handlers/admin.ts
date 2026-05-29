@@ -116,3 +116,40 @@ export async function handlePoolMembers(
   await ctx.reply(message);
 
 }
+
+export async function handleActivateButton(
+  ctx: any,
+  adminActivationSessions: Map<any, any>
+) {
+
+  const poolId = ctx.match[1];
+
+  const pool =
+    await prisma.pool.findUnique({
+      where: {
+        id: poolId,
+      },
+    });
+
+  if (!pool) {
+
+    await ctx.reply(
+      '❌ گروه پیدا نشد'
+    );
+
+    return;
+  }
+
+  adminActivationSessions.set(
+    ctx.from.id,
+    {
+      step: 'WAITING_EMAIL',
+      poolId: pool.id,
+    }
+  );
+
+  await ctx.reply(
+    `📧 ایمیل اکانت برای ${pool.code} را ارسال کنید`
+  );
+
+}

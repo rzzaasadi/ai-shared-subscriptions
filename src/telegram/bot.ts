@@ -43,8 +43,12 @@ import {
 
 import {
   handleReadyPools,
-  handlePoolMembers
+  handlePoolMembers,
+  handleActivateButton
 } from './handlers/admin';
+
+import { createZarinpalPayment }
+from './services/payments';
 
 
 
@@ -66,8 +70,8 @@ bot.start(async (ctx) => {
 Premium Shared Access to AI Tools
 
 👇 Choose an option`,
-    adminKeyboard
-  )
+    mainMenuKeyboard
+  );
 });
 
 bot.hears('🛒 خرید اشتراک AI', async (ctx) => {
@@ -194,31 +198,17 @@ bot.on('text', async (ctx, next) => {
 
 });
 
-bot.action(/activate_(.+)/, async (ctx) => {
+bot.action(
+  /activate_(.+)/,
+  async (ctx) => {
 
-  const poolId = ctx.match[1];
+    await handleActivateButton(
+      ctx,
+      adminActivationSessions
+    );
 
-  const pool = await prisma.pool.findUnique({
-    where: {
-      id: poolId,
-    },
-  });
-
-  if (!pool) return;
-
-  adminActivationSessions.set(
-    ctx.from.id,
-    {
-      step: 'WAITING_EMAIL',
-      poolId: pool.id,
-    }
-  );
-
-  await ctx.reply(
-    `📧 ایمیل اکانت برای ${pool.code} را ارسال کنید`
-  );
-
-});
+  }
+);
 
 bot.action(
   /members_(.+)/,
@@ -231,6 +221,101 @@ bot.action(
       ctx,
       poolId
     );
+
+  }
+);
+bot.action(
+  'cancel_payment',
+  async (ctx) => {
+
+    userSessions.delete(
+      ctx.from.id
+    );
+
+    await ctx.reply(
+      '❌ پرداخت لغو شد'
+    );
+
+  }
+);
+bot.action(
+  'start_payment',
+  async (ctx) => {
+
+    const session =
+      userSessions.get(ctx.from.id);
+
+    if (!session) {
+      return;
+    }
+
+    const product =
+      await prisma.product.findUnique({
+        where: {
+          id: session.productId,
+        },
+      });
+
+    if (!product) {
+      return;
+    }
+
+    const payment =
+  await createZarinpalPayment({
+    amount:
+      product.price *
+      session.quantity,
+
+    description:
+      `${product.name} Shared Account`,
+
+    callbackUrl:
+      'https://pay.dimoon.ir/payment/callback',
+  });
+
+  const authority =
+  payment.data.authority;
+
+  const user =
+  await prisma.user.findUnique({
+    where: {
+      telegramId:
+        ctx.from.id.toString(),
+    },
+  });
+
+if (!user) {
+  return;
+}
+
+await prisma.payment.create({
+  data: {
+    authority,
+    amount:
+      product.price *
+      session.quantity,
+
+    userId: user.id,
+
+    productId: product.id,
+
+    quantity:
+      session.quantity,
+
+    status: 'PENDING',
+  },
+});
+
+const paymentUrl =
+  `https://payment.zarinpal.com/pg/StartPay/${authority}`;
+
+await ctx.reply(
+  `💳 برای پرداخت روی لینک زیر کلیک کنید:
+
+${paymentUrl}`
+);
+
+    console.log(payment);
 
   }
 );
