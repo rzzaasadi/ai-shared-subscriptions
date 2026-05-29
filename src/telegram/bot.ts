@@ -393,12 +393,6 @@ bot.hears(
 
  bot.on('text', async (ctx) => {
 
-  const session = userSessions.get(ctx.from.id);
-
-  if (session) return;
-
-  const text = ctx.message.text;
-
   const handledActivation =
     await handleActivationFlow(
       bot,
@@ -410,7 +404,13 @@ bot.hears(
     return;
   }
 
+  const session =
+    userSessions.get(ctx.from.id);
 
+  if (session) return;
+
+  const text =
+    ctx.message.text;
 
 
 
