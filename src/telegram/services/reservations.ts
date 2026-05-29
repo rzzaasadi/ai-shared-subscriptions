@@ -3,6 +3,12 @@ import { PrismaClient } from '@prisma/client';
 import { generatePoolCode }
 from '../utils/poolCode';
 
+import { bot } from '../bot-instance';
+
+import {
+  notifyAdminsPoolReady,
+} from './notifications';
+
 const prisma = new PrismaClient();
 
 export async function createReservation(params: {
@@ -122,6 +128,21 @@ export async function createReservation(params: {
           : 'FILLING',
     },
   });
+
+  if (totalSeats >= product.capacity) {
+
+  await notifyAdminsPoolReady(
+    bot,
+    {
+      poolId: pool.id,
+      poolCode: pool.code,
+      productName: product.name,
+      totalSeats,
+      capacity: product.capacity,
+    }
+  );
+
+}
 
 
   if (totalSeats >= product.capacity) {
