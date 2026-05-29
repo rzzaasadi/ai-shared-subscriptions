@@ -297,9 +297,35 @@ const user = await prisma.user.findUnique({
 
 console.log('USER', user);
 
-  if (!user) {
-  return;
-  }
+
+
+
+  let user =
+  await prisma.user.findUnique({
+    where: {
+      telegramId:
+        ctx.from.id.toString(),
+    },
+  });
+
+if (!user) {
+
+  user =
+    await prisma.user.create({
+      data: {
+        telegramId:
+          ctx.from.id.toString(),
+
+        firstName:
+          ctx.from.first_name,
+
+        username:
+          ctx.from.username,
+      },
+    });
+
+}
+
 
   await prisma.payment.create({
   data: {
