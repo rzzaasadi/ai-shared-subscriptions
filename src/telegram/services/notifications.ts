@@ -109,3 +109,35 @@ ${params.capacity - params.totalSeats}`
 
 }
 
+
+export async function notifyUserPaymentSuccess(
+  bot: Telegraf,
+  params: {
+    telegramId: string;
+    productName: string;
+    poolCode: string;
+    totalSeats: number;
+    capacity: number;
+  }
+) {
+
+  await bot.telegram.sendMessage(
+    params.telegramId,
+    `✅ پرداخت شما با موفقیت ثبت شد
+
+🎬 محصول:
+${params.productName}
+
+🧩 گروه:
+${params.poolCode}
+
+📊 وضعیت گروه:
+${params.totalSeats}/${params.capacity}
+
+⏳ اشتراک شما در انتظار فعال‌سازی توسط ادمین است.
+
+به محض فعال شدن، اطلاعات ورود برای شما ارسال خواهد شد.`
+  );
+
+}
+

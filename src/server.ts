@@ -143,6 +143,37 @@ app.get(
       });
 
       console.log('RESERVATION CREATED');
+
+      export async function notifyUserPaymentSuccess(
+  bot: Telegraf,
+  params: {
+    telegramId: string;
+    productName: string;
+    poolCode: string;
+    totalSeats: number;
+    capacity: number;
+  }
+) {
+
+  await bot.telegram.sendMessage(
+    params.telegramId,
+    `✅ پرداخت شما با موفقیت ثبت شد
+
+🎬 محصول:
+${params.productName}
+
+🧩 گروه:
+${params.poolCode}
+
+📊 وضعیت گروه:
+${params.totalSeats}/${params.capacity}
+
+⏳ اشتراک شما در انتظار فعال‌سازی توسط ادمین است.
+
+به محض فعال شدن، اطلاعات ورود برای شما ارسال خواهد شد.`
+  );
+
+}
 /*
       await notifyAdminsNewPurchase(
   bot,
@@ -171,9 +202,78 @@ app.get(
 );
 */
       res.send(`
-        <h1>✅ Payment Successful</h1>
-        <p>Your subscription has been registered.</p>
-      `);
+
+<!DOCTYPE html>
+
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>پرداخت موفق</title>
+
+<style>
+body{
+margin:0;
+font-family:tahoma;
+background:#0f172a;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.card{
+background:#1e293b;
+padding:40px;
+border-radius:20px;
+text-align:center;
+max-width:500px;
+width:90%;
+}
+
+.btn{
+display:inline-block;
+margin-top:20px;
+padding:12px 24px;
+background:#22c55e;
+color:white;
+text-decoration:none;
+border-radius:10px;
+font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>✅ پرداخت موفق</h1>
+
+<p>
+اشتراک شما با موفقیت ثبت شد.
+</p>
+
+<p>
+اطلاعات ورود از طریق ربات تلگرام ارسال خواهد شد.
+</p>
+
+<a
+class="btn"
+href="https://t.me/@dimoonaiaccessbot"
+
+>
+
+بازگشت به ربات </a>
+
+</div>
+
+</body>
+</html>
+`);
+
 
     } catch (error) {
 
