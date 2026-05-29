@@ -263,7 +263,7 @@ bot.action(
       });
 
       console.log('PRODUCT_ID', session.productId);
-console.log('PRODUCT', product);
+    console.log('PRODUCT', product);
 
     if (!product) {
       return;
@@ -285,16 +285,17 @@ console.log('PRODUCT', product);
 console.log('PAYMENT RESPONSE');
 console.log(payment);
 
-  const authority =
-  payment.data.authority;
 
-  const user =
-  await prisma.user.findUnique({
-    where: {
-      telegramId:
-        ctx.from.id.toString(),
-    },
-  });
+  const authority = payment.data.authority;
+console.log('AUTHORITY', authority);
+
+const user = await prisma.user.findUnique({
+  where: {
+    telegramId: ctx.from.id.toString(),
+  },
+});
+
+console.log('USER', user);
 
   if (!user) {
   return;
@@ -317,6 +318,7 @@ console.log(payment);
     status: 'PENDING',
   },
 });
+console.log('PAYMENT SAVED');
 
 const paymentUrl =
   `https://payment.zarinpal.com/pg/StartPay/${authority}`;
