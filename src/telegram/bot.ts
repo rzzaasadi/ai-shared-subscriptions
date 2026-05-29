@@ -270,7 +270,7 @@ bot.action(
       `${product.name} Shared Account`,
 
     callbackUrl:
-      'https://pay.dimoon.ir/payment/callback',
+'https://api.dimoon.ir/payment/callback'
   });
 
   const authority =
