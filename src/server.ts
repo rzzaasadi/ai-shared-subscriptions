@@ -173,6 +173,24 @@ app.get(
   }
 );
 
+
+  await bot.telegram.sendMessage(
+  user.telegramId,
+  `✅ پرداخت شما با موفقیت ثبت شد
+
+🎬 ${reservationResult.product.name}
+🧩 ${reservationResult.pool.code}
+
+📊 وضعیت گروه:
+${reservationResult.totalSeats}/${reservationResult.product.capacity}
+
+⏳ پس از تکمیل ظرفیت، اطلاعات ورود برای شما ارسال خواهد شد.
+
+📦 برای مشاهده وضعیت سفارش:
+اشتراک‌های من`
+);
+
+
       res.send(`
 
 <!DOCTYPE html>
