@@ -145,10 +145,7 @@ app.get(
 
       console.log('RESERVATION CREATED');
 
-      await bot.telegram.sendMessage(
-  user.telegramId,
-  '🔥 تست پیام بعد از پرداخت'
-);
+      
 
       await notifyAdminsNewPurchase(
   bot,

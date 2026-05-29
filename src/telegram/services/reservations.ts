@@ -123,6 +123,13 @@ export async function createReservation(params: {
     },
   });
 
+
+  if (totalSeats >= product.capacity) {
+      console.log(
+    `POOL READY ${pool.code}`
+  );
+
+}
   return {
     product,
     pool,
