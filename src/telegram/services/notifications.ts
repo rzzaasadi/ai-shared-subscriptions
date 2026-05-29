@@ -60,3 +60,52 @@ export async function notifyAdminsPoolReady(
   }
 
 }
+
+export async function notifyAdminsNewPurchase(
+  bot: Telegraf,
+  params: {
+    poolCode: string;
+    productName: string;
+    quantity: number;
+    totalSeats: number;
+    capacity: number;
+    userName?: string;
+    firstName?: string;
+  }
+) {
+
+  const admins = await prisma.user.findMany({
+    where: {
+      role: 'OWNER',
+    },
+  });
+
+  for (const admin of admins) {
+
+    await bot.telegram.sendMessage(
+      admin.telegramId,
+      `💰 خرید جدید
+
+🎬 محصول: ${params.productName}
+
+👤 کاربر:
+${params.firstName || '-'}
+${params.userName ? '@' + params.userName : ''}
+
+🪑 سیت خریداری شده:
+${params.quantity}
+
+🧩 گروه:
+${params.poolCode}
+
+📊 وضعیت:
+${params.totalSeats}/${params.capacity}
+
+باقی‌مانده:
+${params.capacity - params.totalSeats}`
+    );
+
+  }
+
+}
+

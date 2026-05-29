@@ -52,9 +52,16 @@ from './services/payments';
 
 
 
+export const bot =
+  new Telegraf(
+    process.env.BOT_TOKEN!
+  );
+
+
+
 
 import cron from 'node-cron';
-const bot = new Telegraf(process.env.BOT_TOKEN!);
+
 const userSessions = new Map();
 const processingUsers = new Set();
 const adminActivationSessions = new Map();

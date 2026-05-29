@@ -6,6 +6,14 @@ import { PrismaClient } from '@prisma/client';
 import { createReservation }
 from './telegram/services/reservations';
 
+import {
+  notifyAdminsNewPurchase,
+  notifyAdminsPoolReady,
+} from './telegram/services/notifications';
+
+import { bot }
+from './telegram/bot';
+
 const prisma = new PrismaClient();
 
 const app = express();
@@ -109,7 +117,16 @@ app.get(
 
       }
 
+
+
+        console.log('START CREATE RESERVATION');
+
+      const reservationResult =  
       await createReservation({
+
+        
+
+
         telegramId:
           user.telegramId,
 
@@ -125,6 +142,34 @@ app.get(
         quantity:
           payment.quantity,
       });
+
+      console.log('RESERVATION CREATED');
+
+      await notifyAdminsNewPurchase(
+  bot,
+  {
+    poolCode:
+      reservationResult.pool.code,
+
+    productName:
+      reservationResult.product.name,
+
+    quantity:
+      payment.quantity,
+
+    totalSeats:
+      reservationResult.totalSeats,
+
+    capacity:
+      reservationResult.product.capacity,
+
+    firstName:
+      user.firstName || undefined,
+
+    userName:
+      user.username || undefined,
+  }
+);
 
       res.send(`
         <h1>✅ Payment Successful</h1>
