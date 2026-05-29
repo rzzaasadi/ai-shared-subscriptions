@@ -11,8 +11,7 @@ import {
   notifyAdminsPoolReady,
 } from './telegram/services/notifications';
 
-import { bot }
-from './telegram/bot';
+
 
 const prisma = new PrismaClient();
 
@@ -144,7 +143,7 @@ app.get(
       });
 
       console.log('RESERVATION CREATED');
-
+/*
       await notifyAdminsNewPurchase(
   bot,
   {
@@ -170,7 +169,7 @@ app.get(
       user.username || undefined,
   }
 );
-
+*/
       res.send(`
         <h1>✅ Payment Successful</h1>
         <p>Your subscription has been registered.</p>
