@@ -347,11 +347,13 @@ if (!user) {
   },
 });
 console.log('PAYMENT SAVED');
-console.log('PAYMENT URL', paymentUrl);
+
 
 const paymentUrl =
   `https://payment.zarinpal.com/pg/StartPay/${authority}`;
 
+  console.log('PAYMENT URL', paymentUrl);
+  
 await ctx.reply(
   `💳 برای پرداخت روی لینک زیر کلیک کنید:
 
