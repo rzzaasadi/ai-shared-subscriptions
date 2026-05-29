@@ -289,13 +289,6 @@ console.log(payment);
   const authority = payment.data.authority;
 console.log('AUTHORITY', authority);
 
-const user = await prisma.user.findUnique({
-  where: {
-    telegramId: ctx.from.id.toString(),
-  },
-});
-
-console.log('USER', user);
 
 
 
@@ -307,6 +300,8 @@ console.log('USER', user);
         ctx.from.id.toString(),
     },
   });
+
+console.log('USER', user);
 
 if (!user) {
 
