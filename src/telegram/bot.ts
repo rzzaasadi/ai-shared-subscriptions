@@ -52,10 +52,8 @@ from './services/payments';
 
 
 
-export const bot =
-  new Telegraf(
-    process.env.BOT_TOKEN!
-  );
+import { bot }
+from './bot-instance';
 
 
 
@@ -353,7 +351,7 @@ const paymentUrl =
   `https://payment.zarinpal.com/pg/StartPay/${authority}`;
 
   console.log('PAYMENT URL', paymentUrl);
-  
+
 await ctx.reply(
   `💳 برای پرداخت روی لینک زیر کلیک کنید:
 

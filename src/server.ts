@@ -11,7 +11,8 @@ import {
   notifyAdminsPoolReady,
 } from './telegram/services/notifications';
 
-
+import { bot }
+from './telegram/bot-instance';
 
 const prisma = new PrismaClient();
 
@@ -144,8 +145,11 @@ app.get(
 
       console.log('RESERVATION CREATED');
 
-      
-/*
+      await bot.telegram.sendMessage(
+  user.telegramId,
+  '🔥 تست پیام بعد از پرداخت'
+);
+
       await notifyAdminsNewPurchase(
   bot,
   {
@@ -171,7 +175,7 @@ app.get(
       user.username || undefined,
   }
 );
-*/
+
       res.send(`
 
 <!DOCTYPE html>
