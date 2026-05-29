@@ -245,6 +245,9 @@ bot.action(
     const session =
       userSessions.get(ctx.from.id);
 
+      console.log('SESSION', session);
+
+
     if (!session) {
       return;
     }
@@ -255,6 +258,9 @@ bot.action(
           id: session.productId,
         },
       });
+
+      console.log('PRODUCT_ID', session.productId);
+console.log('PRODUCT', product);
 
     if (!product) {
       return;
@@ -270,7 +276,7 @@ bot.action(
       `${product.name} Shared Account`,
 
     callbackUrl:
-'https://api.dimoon.ir/payment/callback'
+  'https://api.dimoon.ir/payment/callback'
   });
 
   const authority =
@@ -284,10 +290,11 @@ bot.action(
     },
   });
 
-if (!user) {
+  if (!user) {
   return;
-}
+  }
 
+  
 await prisma.payment.create({
   data: {
     authority,
@@ -318,6 +325,7 @@ ${paymentUrl}`
     console.log(payment);
 
   }
+
 );
 
 
