@@ -238,10 +238,13 @@ bot.action(
 
   }
 );
+
+
 bot.action(
   'start_payment',
   async (ctx) => {
 
+       try {
     const session =
       userSessions.get(ctx.from.id);
 
@@ -276,8 +279,11 @@ console.log('PRODUCT', product);
       `${product.name} Shared Account`,
 
     callbackUrl:
-  'https://api.dimoon.ir/payment/callback'
+      'https://api.dimoon.ir/payment/callback'
   });
+
+console.log('PAYMENT RESPONSE');
+console.log(payment);
 
   const authority =
   payment.data.authority;
@@ -294,8 +300,7 @@ console.log('PRODUCT', product);
   return;
   }
 
-  
-await prisma.payment.create({
+  await prisma.payment.create({
   data: {
     authority,
     amount:
@@ -322,11 +327,24 @@ await ctx.reply(
 ${paymentUrl}`
 );
 
-    console.log(payment);
+console.log(payment);
 
-  }
+} catch (error) {
 
+  console.log('PAYMENT ERROR');
+  console.log(error);
+
+  await ctx.reply(
+    '❌ خطا در ایجاد پرداخت'
+  );
+
+}
+
+}
 );
+
+
+
 
 
 bot.hears(
