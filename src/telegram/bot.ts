@@ -347,6 +347,7 @@ if (!user) {
   },
 });
 console.log('PAYMENT SAVED');
+console.log('PAYMENT URL', paymentUrl);
 
 const paymentUrl =
   `https://payment.zarinpal.com/pg/StartPay/${authority}`;
@@ -357,6 +358,7 @@ await ctx.reply(
 ${paymentUrl}`
 );
 
+console.log('LINK SENT');
 console.log(payment);
 
 } catch (error) {
