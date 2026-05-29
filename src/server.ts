@@ -79,6 +79,12 @@ app.get(
 
       }
 
+
+      if (payment.status === 'SUCCESS') {
+  return res.send('Payment already verified');
+}
+
+
       await prisma.payment.update({
         where: {
           id: payment.id,
