@@ -1,60 +1,61 @@
 import { Telegraf, Markup } from 'telegraf';
 import * as dotenv from 'dotenv';
-
 import { PrismaClient } from '@prisma/client';
+
+import { generatePoolCode }
+from './utils/poolCode';
+
+import { isAdmin }
+from './utils/roles';
+
+import {
+  mainMenuKeyboard,
+  adminKeyboard,
+} from './utils/keyboards';
+
 
 dotenv.config();
 
 const prisma = new PrismaClient();
 
+import { createReservation }
+from './services/reservations';
+
+import {
+  notifyAdminsPoolReady
+} from './services/notifications';
+
+import { activatePool }
+from './services/activations';
+
+import {
+  handleSeatSelection
+} from './handlers/reservations';
+
+import {
+  handleActivationFlow
+} from './handlers/activations';
+
+import {
+  handleSubscriptions
+} from './handlers/subscriptions';
+
+
+import {
+  handleReadyPools,
+  handlePoolMembers
+} from './handlers/admin';
+
+
+
+
+import cron from 'node-cron';
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 const userSessions = new Map();
 const processingUsers = new Set();
 const adminActivationSessions = new Map();
 
-async function generatePoolCode(
-  prefix: string
-) {
 
-  const safePrefix = prefix || 'POOL';
-
-  const latestPool = await prisma.pool.findFirst({
-    where: {
-      code: {
-        startsWith: safePrefix,
-      },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-
-  if (!latestPool || !latestPool.code) {
-    console.log(safePrefix);
-    return `${safePrefix}-100`;
-  }
-
-  const parts = latestPool.code.split('-');
-
-  const number = Number(parts[1]) + 1;
-console.log(`${safePrefix}-${number}`);
-  return `${safePrefix}-${number}`;
-
-}
-
-async function isAdmin(telegramId: string) {
-
-  const user = await prisma.user.findUnique({
-    where: {
-      telegramId,
-    },
-  });
-
-  if (!user) return false;
-
-  return ['OWNER', 'ADMIN', 'SUPPORT'].includes(user.role);
-
-}
 
 bot.start(async (ctx) => {
   await ctx.reply(
@@ -65,12 +66,8 @@ bot.start(async (ctx) => {
 Premium Shared Access to AI Tools
 
 👇 Choose an option`,
-    Markup.keyboard([
-      ['🛒 خرید اشتراک AI'],
-      ['📦 My Subscriptions', '📡 Service Status'],
-      ['🛟 Support'],
-    ]).resize()
-  );
+    adminKeyboard
+  )
 });
 
 bot.hears('🛒 خرید اشتراک AI', async (ctx) => {
@@ -131,361 +128,45 @@ Choose an option`,
 
 });
 
-bot.hears('🟢 READY Pools', async (ctx) => {
 
-  const allowed = await isAdmin(
-    ctx.from.id.toString()
-  );
+bot.hears(
+  '🟢 READY Pools',
+  async (ctx) => {
 
-  if (!allowed) {
-    await ctx.reply('⛔ Access Denied');
-    return;
+    const allowed =
+      await isAdmin(
+        ctx.from.id.toString()
+      );
+
+    if (!allowed) {
+
+      await ctx.reply(
+        '⛔ Access Denied'
+      );
+
+      return;
+    }
+
+    await handleReadyPools(ctx);
+
   }
-
-  const pools = await prisma.pool.findMany({
-    where: {
-      status: 'READY_TO_BUY',
-    },
-    include: {
-      product: true,
-    },
-  });
-
-  if (pools.length === 0) {
-
-    await ctx.reply(
-      '⚠️ No READY pools found.'
-    );
-
-    return;
-  }
-
-  let message = '🟢 READY Pools\n\n';
-
-  pools.forEach((pool, index) => {
-
-    message += `${index + 1}. ${pool.product.name}\n`;
-    message += `👥 ${pool.currentMembers}/${pool.product.capacity}\n`;
-    
-message += `🧩 ${pool.code}\n`;
-message += `👥 ${pool.currentMembers}/${pool.product.capacity}\n\n`;
-  });
-
-  const buttons = pools.map((pool) => [
-
-  Markup.button.callback(
-    `👥 ${pool.code}`,
-    `members_${pool.id}`
-  ),
-
-  Markup.button.callback(
-    `🔐 فعال‌سازی`,
-    `activate_${pool.id}`
-  ),
-
-]);
-
-await ctx.reply(
-  message,
-  Markup.inlineKeyboard(buttons)
 );
-await ctx.reply(
-  '🧩 کد گروه موردنظر را ارسال کنید'
-);
-
-});
-
-bot.command('activate', async (ctx) => {
-
-  const allowed = await isAdmin(
-    ctx.from.id.toString()
-  );
-
-  if (!allowed) {
-    await ctx.reply('⛔ Access Denied');
-    return;
-  }
-
-  const parts = ctx.message.text.split(' ');
-
-  if (parts.length < 4) {
-
-    await ctx.reply(
-      'Usage:\n/activate POOL_ID EMAIL PASSWORD'
-    );
-
-    return;
-  }
-
-  const poolId = parts[1];
-  const email = parts[2];
-  const password = parts.slice(3).join(' ');
-
-  const pool = await prisma.pool.findUnique({
-    where: {
-      id: poolId,
-    },
-    include: {
-      reservations: {
-        include: {
-          user: true,
-        },
-      },
-      product: true,
-    },
-  });
-
-  if (!pool) {
-
-    await ctx.reply(
-      '❌ Pool not found.'
-    );
-
-    return;
-  }
-
-  await prisma.pool.update({
-    where: {
-      id: pool.id,
-    },
-    data: {
-      status: 'ACTIVE',
-      email,
-      password,
-    },
-  });
-
-  for (const reservation of pool.reservations) {
-
-  await prisma.membership.create({
-    data: {
-      userId: reservation.userId,
-      poolId: pool.id,
-      status: 'ACTIVE',
-    },
-  });
-
-  await prisma.reservation.update({
-    where: {
-      id: reservation.id,
-    },
-    data: {
-      status: 'CONFIRMED',
-    },
-  });
-
-}
-});
-
-
- 
-
-  
-    
-
-
-
-
-
-
-
-
-
-
-
 
 
 bot.hears(['1', '2', '3'], async (ctx) => {
 
-  const session = userSessions.get(ctx.from.id);
-
-  if (!session) return;
-
-  if (session.action !== 'SELECTING_QUANTITY') return;
-
-  if (processingUsers.has(ctx.from.id)) return;
-
-  processingUsers.add(ctx.from.id);
-
-  try {
-
-    const quantity = Number(ctx.message.text);
-
-    const product = await prisma.product.findUnique({
-      where: {
-        id: session.productId,
-      },
-    });
-
-    if (!product) return;
-
-    let pool: any = null;
-
-    const availablePools = await prisma.pool.findMany({
-      where: {
-        productId: product.id,
-        status: 'FILLING',
-      },
-    });
-
-    for (const existingPool of availablePools) {
-
-      const remainingSeats =
-        product.capacity - existingPool.currentMembers;
-
-      if (remainingSeats >= quantity) {
-        pool = existingPool;
-        break;
-      }
-
-    }
-
-    if (!pool) {
-
-      const code = await generatePoolCode(
-  product.codePrefix || 'POOL'
-);
-
-pool = await prisma.pool.create({
-  data: {
-    code,
-    title: `گروه ${code}`,
-    productId: product.id,
-  },
-});
-
-    }
-
-    userSessions.delete(ctx.from.id);
-
-    let user = await prisma.user.findUnique({
-      where: {
-        telegramId: ctx.from.id.toString(),
-      },
-    });
-
-    if (!user) {
-
-      user = await prisma.user.create({
-        data: {
-          telegramId: ctx.from.id.toString(),
-          firstName: ctx.from.first_name,
-          username: ctx.from.username,
-        },
-      });
-
-    }
-
-    await prisma.reservation.create({
-      data: {
-        userId: user.id,
-        productId: product.id,
-        poolId: pool.id,
-        quantity,
-      },
-    });
-
-    const reservations = await prisma.reservation.findMany({
-      where: {
-        poolId: pool.id,
-        status: 'PENDING',
-      },
-    });
-
-    const totalSeats = reservations.reduce(
-      (sum, reservation) => sum + reservation.quantity,
-      0
-    );
-
-    await prisma.pool.update({
-      where: {
-        id: pool.id,
-      },
-      data: {
-        currentMembers: totalSeats,
-        status:
-          totalSeats >= product.capacity
-            ? 'READY_TO_BUY'
-            : 'FILLING',
-      },
-    });
-
-    if (totalSeats >= product.capacity) {
-
-  const admins = await prisma.user.findMany({
-    where: {
-      role: 'OWNER',
-    },
-  });
-
-  for (const admin of admins) {
-
-    await bot.telegram.sendMessage(
-      admin.telegramId,
-      `🔥 گروه ${pool.code} تکمیل شد
-
-🎬 محصول: ${product.name}
-👥 ظرفیت: ${totalSeats}/${product.capacity}
-
-⚡ آماده خرید و فعال‌سازی`,
-      {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: '👥 اعضا',
-                callback_data: `members_${pool.id}`,
-              },
-              {
-                text: '🔐 فعال‌سازی',
-                callback_data: `activate_${pool.id}`,
-              },
-            ],
-          ],
-        },
-      }
-    );
-
-  }
-
-}
-
-    
-
-
-
-    await ctx.reply(
-      `✅ رزرو شما ثبت شد
-
-🧩 گروه: ${pool.code}
-
-🪑 تعداد سیت: ${quantity}
-👥 ظرفیت گروه: ${totalSeats}/${product.capacity}
-
-💰 مبلغ کل: ${(product.price * quantity).toLocaleString()} تومان
-
-${
-  totalSeats >= product.capacity
-    ? '🔥 ظرفیت گروه تکمیل شد و به زودی فعال می‌شود.'
-    : `⏳ ${product.capacity - totalSeats} ظرفیت دیگر باقی مانده است.`
-}`,
-      Markup.keyboard([
-        ['🛒 خرید اشتراک AI'],
-        ['📦 اشتراک‌های من', '📡 وضعیت سرویس‌ها'],
-        ['🛟 پشتیبانی'],
-      ]).resize()
-    );
-
-  } finally {
-
-    processingUsers.delete(ctx.from.id);
-
-  }
+  await handleSeatSelection(
+    bot,
+    ctx,
+    userSessions,
+    processingUsers
+  );
 
 });
 
+ 
 
-
+  
 
 bot.on('text', async (ctx, next) => {
 
@@ -539,56 +220,35 @@ bot.action(/activate_(.+)/, async (ctx) => {
 
 });
 
-bot.action(/members_(.+)/, async (ctx) => {
+bot.action(
+  /members_(.+)/,
+  async (ctx) => {
 
-  const poolId = ctx.match[1];
+    const poolId =
+      ctx.match[1];
 
-  const reservations =
-    await prisma.reservation.findMany({
-      where: {
-        poolId,
-      },
-      include: {
-        user: true,
-      },
-    });
-
-  if (reservations.length === 0) {
-
-    await ctx.reply(
-      '⚠️ عضوی پیدا نشد'
+    await handlePoolMembers(
+      ctx,
+      poolId
     );
 
-    return;
   }
+);
 
-  let message =
-    '👥 اعضای گروه\n\n';
 
-  reservations.forEach((reservation, index) => {
+bot.hears(
+  '📦 اشتراک‌های من',
+  async (ctx) => {
 
-    message += `${index + 1}. `;
-    message += `${reservation.user.firstName || 'User'}\n`;
+    await handleSubscriptions(ctx);
 
-    message += `🪑 ${reservation.quantity} سیت\n`;
-
-    message += `📱 @${reservation.user.username || 'unknown'}\n\n`;
-
-  });
-
-  await ctx.reply(message);
-
-});
+  }
+);
 
 
 
 
-
-
-
-
-
-bot.on('text', async (ctx) => {
+ bot.on('text', async (ctx) => {
 
   const session = userSessions.get(ctx.from.id);
 
@@ -596,150 +256,18 @@ bot.on('text', async (ctx) => {
 
   const text = ctx.message.text;
 
-  const activationSession =
-  adminActivationSessions.get(ctx.from.id);
-
-if (
-  activationSession &&
-  activationSession.step === 'WAITING_EMAIL'
-) {
-
-  activationSession.email =
-    ctx.message.text;
-
-  activationSession.step =
-    'WAITING_PASSWORD';
-
-  adminActivationSessions.set(
-    ctx.from.id,
-    activationSession
-  );
-
-  await ctx.reply(
-    '🔑 پسورد اکانت را ارسال کنید'
-  );
-
-  return;
-}
-
-if (
-  activationSession &&
-  activationSession.step === 'WAITING_PASSWORD'
-) {
-
-  activationSession.password =
-    ctx.message.text;
-
-  activationSession.step =
-    'WAITING_EXPIRE_DATE';
-
-  adminActivationSessions.set(
-    ctx.from.id,
-    activationSession
-  );
-
-  await ctx.reply(
-    '📅 تاریخ انقضا را ارسال کنید\n\nمثال:\n2026-06-30'
-  );
-
-  return;
-}
-
-if (
-  activationSession &&
-  activationSession.step === 'WAITING_EXPIRE_DATE'
-) {
-
-  const expiresAt = new Date(
-    ctx.message.text
-  );
-
-  const pool = await prisma.pool.findUnique({
-    where: {
-      id: activationSession.poolId,
-    },
-    include: {
-      reservations: {
-        include: {
-          user: true,
-        },
-      },
-      product: true,
-    },
-  });
-
-  if (!pool) {
-
-    await ctx.reply(
-      '❌ گروه پیدا نشد'
+  const handledActivation =
+    await handleActivationFlow(
+      bot,
+      ctx,
+      adminActivationSessions
     );
 
+  if (handledActivation) {
     return;
   }
 
-  await prisma.pool.update({
-    where: {
-      id: pool.id,
-    },
-    data: {
-      status: 'ACTIVE',
-      email: activationSession.email,
-      password: activationSession.password,
-      expiresAt,
-    },
-  });
 
-  for (const reservation of pool.reservations) {
-
-    await prisma.membership.create({
-      data: {
-        userId: reservation.userId,
-        poolId: pool.id,
-        status: 'ACTIVE',
-      },
-    });
-
-    await prisma.reservation.update({
-      where: {
-        id: reservation.id,
-      },
-      data: {
-        status: 'CONFIRMED',
-      },
-    });
-
-    await bot.telegram.sendMessage(
-      reservation.user.telegramId,
-      `🎉 اشتراک شما فعال شد
-
-🧩 گروه: ${pool.code}
-
-🎬 محصول: ${pool.product.name}
-
-📧 ایمیل:
-${activationSession.email}
-
-🔑 پسورد:
-${activationSession.password}
-
-📅 تاریخ انقضا:
-${ctx.message.text}
-
-⚠️ لطفاً اطلاعات اکانت را تغییر ندهید.`
-    );
-
-  }
-
-  adminActivationSessions.delete(
-    ctx.from.id
-  );
-
-  await ctx.reply(
-    `✅ گروه ${pool.code} فعال شد`
-  );
-
-  return;
-}
 
 
 
@@ -808,10 +336,63 @@ if (activePool) {
       ['بازگشت'],
     ]).resize()
   );
-
+});
   
 
+
+
+cron.schedule('0 */12 * * *', async () => {
+
+  const now = new Date();
+
+  const threeDaysLater = new Date();
+
+  threeDaysLater.setDate(
+    now.getDate() + 3
+  );
+
+  const pools = await prisma.pool.findMany({
+    where: {
+      status: 'ACTIVE',
+      expiresAt: {
+        lte: threeDaysLater,
+        gte: now,
+      },
+    },
+    include: {
+      reservations: {
+        include: {
+          user: true,
+        },
+      },
+      product: true,
+    },
+  });
+
+  for (const pool of pools) {
+
+    for (const reservation of pool.reservations) {
+
+      await bot.telegram.sendMessage(
+        reservation.user.telegramId,
+        `⏰ اشتراک شما تا ۳ روز دیگر منقضی می‌شود
+
+🎬 ${pool.product.name}
+🧩 ${pool.code}
+
+📅 تاریخ انقضا:
+${pool.expiresAt?.toLocaleDateString('fa-IR')}
+
+برای تمدید،
+دوباره اشتراک رزرو کنید 🙌`
+      );
+
+    }
+
+  }
+
 });
+
 
 
 bot.launch();

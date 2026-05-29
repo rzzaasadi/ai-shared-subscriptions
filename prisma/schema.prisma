@@ -36,85 +36,104 @@ enum UserRole {
 }
 
 model User {
-  id          String        @id @default(cuid())
-  telegramId  String        @unique
-  firstName   String?
-  username    String?
-  createdAt   DateTime      @default(now())
+  id         String   @id @default(cuid())
+  telegramId String   @unique
+  firstName  String?
+  username   String?
+  createdAt  DateTime @default(now())
 
-  memberships Membership[]
+  payments Payment[]
+
+  memberships  Membership[]
   reservations Reservation[]
-  role UserRole @default(USER)
+  role         UserRole      @default(USER)
 }
 
 model Product {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  codePrefix String?
+  codePrefix  String?
   description String?
   price       Int
   capacity    Int
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
-  pools       Pool[]
+  pools        Pool[]
   reservations Reservation[]
 }
 
 model Pool {
-  id             String          @id @default(cuid())
+  id   String  @id @default(cuid())
   code String? @unique
-  
-  title          String
-  status         PoolStatus      @default(FILLING)
 
-  email          String?
-  password       String?
+  title  String
+  status PoolStatus @default(FILLING)
 
-  currentMembers Int             @default(0)
+  email    String?
+  password String?
 
-  startsAt       DateTime?
-  expiresAt      DateTime?
+  currentMembers Int @default(0)
 
-  createdAt      DateTime        @default(now())
+  startsAt  DateTime?
+  expiresAt DateTime?
 
-  productId      String
-  product        Product         @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
 
-  memberships    Membership[]
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  memberships  Membership[]
   reservations Reservation[]
 }
 
 model Membership {
-  id          String              @id @default(cuid())
+  id String @id @default(cuid())
 
-  status      MembershipStatus    @default(PENDING)
+  status MembershipStatus @default(PENDING)
 
-  joinedAt    DateTime            @default(now())
+  joinedAt DateTime @default(now())
 
-  userId      String
-  poolId      String
+  expiresAt DateTime?
 
-  user        User                @relation(fields: [userId], references: [id])
-  pool        Pool                @relation(fields: [poolId], references: [id])
+  userId String
+  poolId String
+
+  user User @relation(fields: [userId], references: [id])
+  pool Pool @relation(fields: [poolId], references: [id])
 }
 
 model Reservation {
-  id          String              @id @default(cuid())
+  id String @id @default(cuid())
 
-  status      ReservationStatus   @default(PENDING)
+  status ReservationStatus @default(PENDING)
 
   quantity Int @default(1)
 
+  createdAt DateTime @default(now())
 
-  createdAt   DateTime            @default(now())
+  payments Payment[]
 
-  userId      String
-  productId   String
-  poolId      String?
+  userId    String
+  productId String
+  poolId    String?
 
-  user         User      @relation(fields: [userId], references: [id])
-  product      Product   @relation(fields: [productId], references: [id])
-  pool         Pool?     @relation(fields: [poolId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  pool    Pool?   @relation(fields: [poolId], references: [id])
+}
 
+model Payment {
+  id        String @id @default(cuid())
+  authority String @unique
+  amount    Int
+  status    String @default("PENDING")
+
+  userId        String
+  reservationId String
+
+  createdAt DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  reservation Reservation @relation(fields: [reservationId], references: [id])
 }
