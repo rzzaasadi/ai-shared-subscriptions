@@ -39,39 +39,93 @@ export async function handleSubscriptions(
       },
     });
 
-  if (memberships.length === 0) {
+  const reservations =
+    await prisma.reservation.findMany({
+      where: {
+        userId: user.id,
+        status: 'PENDING',
+      },
+      include: {
+        pool: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+  if (
+    memberships.length === 0 &&
+    reservations.length === 0
+  ) {
 
     await ctx.reply(
-      '⚠️ اشتراک فعالی ندارید'
+      '⚠️ اشتراکی پیدا نشد'
     );
 
     return;
   }
 
   let message =
-    '📦 اشتراک‌های فعال شما\n\n';
+    '📦 اشتراک‌های شما\n\n';
 
-  memberships.forEach(
-    (membership, index) => {
+  if (memberships.length > 0) {
 
-      message += `${index + 1}️⃣ `;
-      message += `${membership.pool.product.name}\n`;
+    message +=
+      '🟢 اشتراک‌های فعال\n\n';
 
-      message += `🧩 گروه: ${membership.pool.code}\n\n`;
+    memberships.forEach(
+      (membership, index) => {
 
-      message += `📧 ${membership.pool.email}\n`;
-      message += `🔑 ${membership.pool.password}\n\n`;
+        message += `${index + 1}️⃣ `;
+        message += `${membership.pool.product.name}\n`;
 
-      message += `📅 انقضا:\n`;
+        message += `🧩 گروه: ${membership.pool.code}\n\n`;
+
+        message += `📧 ${membership.pool.email}\n`;
+        message += `🔑 ${membership.pool.password}\n\n`;
+
+        message += `📅 انقضا:\n`;
+
+        message +=
+          `${membership.pool.expiresAt?.toLocaleDateString('fa-IR')}\n`;
+
+        message +=
+          '\n━━━━━━━━━━\n\n';
+
+      }
+    );
+
+  }
+
+  if (reservations.length > 0) {
+
+  message +=
+    '🟡 در انتظار تکمیل ظرفیت\n\n';
+
+    reservations.forEach(
+    (reservation, index) => {
+
+      if (!reservation.pool) {
+        return;
+      }
 
       message +=
-        `${membership.pool.expiresAt?.toLocaleDateString('fa-IR')}\n`;
+        `${index + 1}️⃣ ${reservation.pool.product.name}\n`;
 
       message +=
-        '\n━━━━━━━━━━\n\n';
+        `🧩 گروه: ${reservation.pool.code}\n`;
+
+      message +=
+        `📊 وضعیت:\n`;
+
+      message +=
+        `${reservation.pool.currentMembers}/${reservation.pool.product.capacity}\n\n`;
 
     }
   );
+
+  }
 
   await ctx.reply(message);
 
