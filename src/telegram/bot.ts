@@ -80,6 +80,7 @@ Premium Shared Access to AI Tools
 });
 
 bot.hears('🛒 خرید اشتراک AI', async (ctx) => {
+  userSessions.delete(ctx.from.id);
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
@@ -97,6 +98,7 @@ bot.hears('🛒 خرید اشتراک AI', async (ctx) => {
 });
 
 bot.hears('⬅️ بازگشت', async (ctx) => {
+  userSessions.delete(ctx.from.id);
   await ctx.reply(
     `🏠 Main Menu`,
     Markup.keyboard([
