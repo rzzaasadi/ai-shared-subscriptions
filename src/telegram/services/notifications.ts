@@ -31,11 +31,36 @@ export async function notifyAdminsPoolReady(
 
   for (const admin of admins) {
 
-    
+  await bot.telegram.sendMessage(
+    admin.telegramId,
+    `🔥 گروه ${poolCode} تکمیل شد
 
-  }
+🎬 محصول: ${productName}
+👥 ظرفیت: ${totalSeats}/${capacity}
+
+⚡ آماده خرید و فعال‌سازی`,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: '👥 اعضا',
+              callback_data: `members_${poolId}`,
+            },
+            {
+              text: '🔐 فعال‌سازی',
+              callback_data: `activate_${poolId}`,
+            },
+          ],
+        ],
+      },
+    }
+  );
 
 }
+  }
+
+
 
 export async function notifyAdminsNewPurchase(
   bot: Telegraf,
