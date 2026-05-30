@@ -55,6 +55,10 @@ from './services/payments';
 import { bot }
 from './bot-instance';
 
+import {
+  handleUsers,
+} from './handlers/users';
+
 
 
 
@@ -163,6 +167,23 @@ bot.hears(
   }
 );
 
+bot.hears(
+  '👥 Users',
+  async (ctx) => {
+
+    const allowed =
+      await isAdmin(
+        ctx.from.id.toString()
+      );
+
+    if (!allowed) {
+      return;
+    }
+
+    await handleUsers(ctx);
+
+  }
+);
 
 bot.hears(['1', '2', '3'], async (ctx) => {
 
