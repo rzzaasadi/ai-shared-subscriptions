@@ -222,6 +222,41 @@ if (
     }
   );
 
+  const fullPool =
+  await prisma.pool.findUnique({
+    where: {
+      id: reservationResult.pool.id,
+    },
+    include: {
+      reservations: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+
+if (fullPool) {
+
+  for (const reservation of fullPool.reservations) {
+
+    await bot.telegram.sendMessage(
+      reservation.user.telegramId,
+      `🎉 ظرفیت گروه تکمیل شد
+
+🎬 ${reservationResult.product.name}
+🧩 ${reservationResult.pool.code}
+
+✅ گروه آماده فعال‌سازی است.
+
+⏳ اطلاعات ورود حداکثر تا 24 ساعت آینده ارسال خواهد شد.`
+    );
+
+  }
+
+}
+
+
 }
       
 
