@@ -294,6 +294,21 @@ html = html.replace(
 res.send(html);
 
 
+await bot.telegram.sendMessage(
+  user.telegramId,
+  `✅ پرداخت شما با موفقیت ثبت شد
+
+🎬 ${reservationResult.product.name}
+
+🪑 تعداد سیت: ${payment.quantity}
+
+📦 سفارش شما ثبت شد و پس از تکمیل ظرفیت گروه، اطلاعات ورود از طریق ربات ارسال خواهد شد.
+
+برای مشاهده وضعیت:
+📦 اشتراک‌های من`
+);
+
+
 
 /*
 
