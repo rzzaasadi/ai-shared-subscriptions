@@ -293,10 +293,11 @@ html = html.replace(
 
 res.send(html);
 
+try {
 
-await bot.telegram.sendMessage(
-  user.telegramId,
-  `✅ پرداخت شما با موفقیت ثبت شد
+  await bot.telegram.sendMessage(
+    user.telegramId,
+    `✅ پرداخت شما با موفقیت ثبت شد
 
 🎬 ${reservationResult.product.name}
 
@@ -306,7 +307,17 @@ await bot.telegram.sendMessage(
 
 برای مشاهده وضعیت:
 📦 اشتراک‌های من`
-);
+  );
+
+} catch (error) {
+
+  console.log(
+    'TELEGRAM NOTIFICATION FAILED'
+  );
+
+  console.log(error);
+
+}
 
 
 
