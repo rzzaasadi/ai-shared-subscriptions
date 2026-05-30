@@ -2,7 +2,6 @@ export async function isChannelMember(
   bot: any,
   telegramId: number
 ) {
-
   try {
 
     const member =
@@ -11,16 +10,19 @@ export async function isChannelMember(
         telegramId
       );
 
+    console.log('CHANNEL MEMBER:', member);
+
     return [
       'creator',
       'administrator',
       'member'
     ].includes(member.status);
 
-  } catch {
+  } catch (error) {
+
+    console.log('CHANNEL ERROR:', error);
 
     return false;
 
   }
-
 }
