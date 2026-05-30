@@ -180,21 +180,27 @@ bot.hears(['1', '2', '3'], async (ctx) => {
 bot.on('text', async (ctx, next) => {
 
   const text = ctx.message.text;
+  
+  
   console.log(
   'TEXT RECEIVED:',
   text
 );
 
-  const pool = await prisma.pool.findFirst({
-    where: {
-      code: text,
-      status: 'READY_TO_BUY',
-    },
-  });
+console.log(
+  'SEARCHING PRODUCT...'
+);
 
-  if (!pool) {
-    return next();
-  }
+const pool = await prisma.pool.findFirst({
+  where: {
+    code: text,
+    status: 'READY_TO_BUY',
+  },
+});
+
+if (!pool) {
+  return next();
+}
 
   adminActivationSessions.set(ctx.from.id, {
     step: 'WAITING_EMAIL',
@@ -357,9 +363,15 @@ const paymentUrl =
   console.log('PAYMENT URL', paymentUrl);
 
 await ctx.reply(
-  `💳 برای پرداخت روی لینک زیر کلیک کنید:
-
-${paymentUrl}`
+`💳 برای پرداخت روی دکمه زیر کلیک کنید`,
+Markup.inlineKeyboard([
+[
+Markup.button.url(
+'💳 پرداخت امن',
+paymentUrl
+)
+]
+])
 );
 
 console.log('LINK SENT');
