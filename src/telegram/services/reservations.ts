@@ -149,6 +149,40 @@ export async function createReservation(params: {
       console.log(
     `POOL READY ${pool.code}`
   );
+  
+  const fullPool =
+  await prisma.pool.findUnique({
+    where: {
+      id: pool.id,
+    },
+    include: {
+      reservations: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+
+if (fullPool) {
+
+  for (const reservation of fullPool.reservations) {
+
+    await bot.telegram.sendMessage(
+      reservation.user.telegramId,
+      `🎉 ظرفیت گروه تکمیل شد
+
+🎬 ${product.name}
+🧩 ${pool.code}
+
+✅ گروه آماده فعال‌سازی است.
+
+⏳ اطلاعات ورود حداکثر تا 24 ساعت آینده ارسال خواهد شد.`
+    );
+
+  }
+
+}
 
 }
   return {

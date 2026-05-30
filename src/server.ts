@@ -145,6 +145,22 @@ app.get(
 
       console.log('RESERVATION CREATED');
 
+      await bot.telegram.sendMessage(
+  user.telegramId,
+  `✅ پرداخت شما با موفقیت ثبت شد
+
+🎬 ${reservationResult.product.name}
+🧩 ${reservationResult.pool.code}
+
+📊 وضعیت گروه:
+${reservationResult.totalSeats}/${reservationResult.product.capacity}
+
+⏳ منتظر تکمیل ظرفیت گروه باشید.
+
+📦 برای مشاهده وضعیت:
+اشتراک‌های من`
+);
+
       
 
       await notifyAdminsNewPurchase(
