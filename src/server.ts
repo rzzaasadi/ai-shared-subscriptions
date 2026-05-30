@@ -161,9 +161,17 @@ ${reservationResult.totalSeats}/${reservationResult.product.capacity}
 اشتراک‌های من`
 );
 
-      
+if (
+  reservationResult.totalSeats >=
+  reservationResult.product.capacity
+) {
 
-      await notifyAdminsNewPurchase(
+  // send group completed messages
+
+}
+
+      
+await notifyAdminsNewPurchase(
   bot,
   {
     poolCode:
@@ -188,6 +196,34 @@ ${reservationResult.totalSeats}/${reservationResult.product.capacity}
       user.username || undefined,
   }
 );
+
+if (
+  reservationResult.totalSeats >=
+  reservationResult.product.capacity
+) {
+
+  await notifyAdminsPoolReady(
+    bot,
+    {
+      poolId:
+        reservationResult.pool.id,
+
+      poolCode:
+        reservationResult.pool.code,
+
+      productName:
+        reservationResult.product.name,
+
+      totalSeats:
+        reservationResult.totalSeats,
+
+      capacity:
+        reservationResult.product.capacity,
+    }
+  );
+
+}
+      
 
 
   await bot.telegram.sendMessage(
