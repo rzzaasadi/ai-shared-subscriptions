@@ -100,7 +100,7 @@ bot.hears('⬅️ بازگشت', async (ctx) => {
   await ctx.reply(
     `🏠 Main Menu`,
     Markup.keyboard([
-      ['🛒 Buy AI Subscription'],
+      ['🛒 خرید اشتراک AI'],
       ['📦 اشتراک‌های من', '📡 وضعیت سرویس‌ها'],
       ['🛟 پشتیبانی'],
     ]).resize()
@@ -180,6 +180,10 @@ bot.hears(['1', '2', '3'], async (ctx) => {
 bot.on('text', async (ctx, next) => {
 
   const text = ctx.message.text;
+  console.log(
+  'TEXT RECEIVED:',
+  text
+);
 
   const pool = await prisma.pool.findFirst({
     where: {
@@ -419,6 +423,10 @@ bot.hears(
       name: text,
     },
   });
+  console.log(
+  'PRODUCT FOUND:',
+  product?.name
+);
 
   if (!product) return;
 

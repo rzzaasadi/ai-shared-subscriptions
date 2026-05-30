@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پرداخت موفقیت‌آمیز - اشتراک VIP</title>
+    <!-- استفاده از CDN تفکیک شده Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- وارد کردن فونت زیبای وزیرمتن برای ظاهر بسیار شکیل و خوانا -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* تنظیم فونت پیش‌فرض کل صفحه به وزیرمتن */
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            background-color: #f3f6fa; /* هماهنگ با رنگ پس‌زمینه دقیق تصویر ارسالی */
+        }
+
+        /* انیمیشن چرخش و پالس آرام برای پس‌زمینه‌های درخشان پاستلی */
+        @keyframes floatGlow {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-15px) scale(1.08); }
+        }
+        .glow-sphere {
+            animation: floatGlow 10s ease-in-out infinite;
+        }
+
+        /* انیمیشن رسم شدن گام به گام تیک سبزرنگ موفقیت */
+        @keyframes drawCircle {
+            to { stroke-dashoffset: 0; }
+        }
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+        /* ترکیب هوشمند ترنسلیت گلاسمورفیک برای جلوگیری از به هم خوردن تراز آیکون */
+        @keyframes successPop {
+            0% { transform: translate(-6px, 6px) scale(0.8); opacity: 0; }
+            100% { transform: translate(-6px, 6px) scale(1); opacity: 1; }
+        }
+        
+        .circle-draw {
+            stroke-dasharray: 63;
+            stroke-dashoffset: 63;
+            animation: drawCircle 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .check-draw {
+            stroke-dasharray: 22;
+            stroke-dashoffset: 22;
+            animation: drawCheck 0.5s 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .success-wrapper {
+            animation: successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col justify-center items-center p-3 sm:p-4 relative overflow-hidden bg-[#f3f6fa] text-slate-800 antialiased selection:bg-[#1E3CFF]/20 selection:text-blue-900">
+
+    <!-- دایره‌های رنگی پاستلی در پس‌زمینه برای عمق دادن به محیط لایت‌مود -->
+    <div class="absolute top-[-10%] left-[-10%] w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-[#1E3CFF]/10 rounded-full blur-[110px] pointer-events-none glow-sphere"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-blue-400/10 rounded-full blur-[110px] pointer-events-none glow-sphere" style="animation-delay: -5s;"></div>
+
+    <!-- کارت اصلی تراکنش با طراحی دقیق مشابه تصویر بلیت -->
+    <main class="w-full max-w-[440px] bg-white border border-slate-200/50 rounded-[2rem] sm:rounded-[2.2rem] p-5 sm:p-8 shadow-[0_25px_60px_-15px_rgba(30,60,255,0.06)] relative z-10 space-y-5 transform transition-all duration-300">
+        
+        <!-- بخش بالایی رسید (فقط آیکون تیک مدرن گلاسمورفیک در مرکز قرار دارد) -->
+        <div class="flex justify-center items-center py-2">
+            <div class="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
+                <!-- دایره پس‌زمینه آبی اصلی -->
+                <div class="absolute w-14 h-14 sm:w-16 sm:h-16 bg-[#1E3CFF] rounded-full shadow-[0_8px_20px_rgba(30,60,255,0.25)]"></div>
+                <!-- کارت گلاسمورفیک شیشه‌ای روی دایره با زاویه ملایم و انیمیشن ارتقای یافته -->
+                <div class="absolute w-12 h-12 sm:w-14 sm:h-14 bg-white/25 border border-white/40 rounded-2xl backdrop-blur-md shadow-lg flex items-center justify-center success-wrapper">
+                    <!-- آیکون تیک سفید نقاشی شونده -->
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" class="check-draw" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- جداکننده با افکت بلیت (خط‌چین افقی با فرورفتگی نیم‌دایره در چپ و راست) -->
+        <div class="relative py-2">
+            <!-- برش دایره‌ای فرورفته چپ کاملاً ریسپانسیو و منطبق بر لبه کارت -->
+            <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#f3f6fa] rounded-full border-r border-slate-200/40"></div>
+            <!-- برش دایره‌ای فرورفته راست کاملاً ریسپانسیو و منطبق بر لبه کارت -->
+            <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#f3f6fa] rounded-full border-l border-slate-200/40"></div>
+            <!-- خط چین جداکننده -->
+            <div class="border-t-2 border-dashed border-slate-100 w-full"></div>
+        </div>
+
+        <!-- بخش پایین فاکتور (عنوان پرداخت موفق، تاریخ پرداخت و توضیحات) -->
+        <div class="space-y-4">
+            
+            <!-- ردیف عنوان و باکس تاریخ پرداخت -->
+            <div class="flex justify-between items-center gap-3 sm:gap-4">
+                <div class="text-right space-y-1">
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-black text-[#1E3CFF]">
+ثبت سفارش موفق
+</h1>
+                    <p class="text-[10px] sm:text-xs text-slate-400 font-medium">
+اشتراک شما با موفقیت ثبت شد.
+</p>
+                </div>
+                <!-- کادر شکیل تاریخ پرداخت در سمت چپ با سایز بهینه برای موبایل -->
+                <div class="bg-[#f8fafc] border border-slate-100 rounded-xl p-3 text-right">
+    <span class="block text-xs text-slate-400 mb-1">
+        گروه اشتراکی:
+    </span>
+
+    <span class="block text-sm font-black text-slate-800">
+            🧩 {{POOL_CODE}} 🟣  {{CURRENT_MEMBERS}}/{{CAPACITY}}
+    </span>
+</div>
+                </div>
+            </div>
+
+            <!-- باکس توضیحات سفارش بر اساس قالب تصویر ارسالی -->
+            <div class="bg-[#1E3CFF]/5 border border-[#1E3CFF]/10 rounded-2xl p-4 text-right space-y-1">
+    <h4 class="text-sm font-bold text-slate-800">
+        وضعیت سفارش
+    </h4>
+
+    <p class="text-xs leading-relaxed text-slate-500 font-medium">
+        اشتراک شما با موفقیت ثبت شد.
+
+        <br><br>
+
+        در صورت تکمیل ظرفیت گروه،
+        اطلاعات ورود از طریق ربات تلگرام ارسال خواهد شد.
+    </p>
+</div>
+
+        </div>
+
+        <!-- دکمه هدایت مستقیم بدون انیمیشن بارگزاری یا توقف -->
+        <div class="space-y-2.5 pt-2">
+            <a id="redirectBtn" href="https://t.me/@dimoonaiaccessbot" target="_blank" class="w-full py-3.5 px-4 bg-[#1E3CFF] text-white rounded-xl font-bold hover:bg-blue-700 hover:shadow-[0_10px_25px_rgba(30,60,255,0.3)] hover:scale-[1.01] active:scale-100 transition-all flex justify-center items-center gap-2 group cursor-pointer text-xs sm:text-sm">
+                <span id="btnText" class="font-black">برو به تلگرام</span>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- لوگوی استودیو Dimoon در انتهای صفحه مشابه تصویر ارسالی -->
+    <div class="flex justify-center pt-6 opacity-70 relative z-10 select-none">
+    <img
+        src="/logo.png"
+        alt="Dimoon Studio"
+        class="h-10 opacity-15"
+    />
+</div>
+
+    <!-- کانتینر پیام کپی موفقیت‌آمیز مستقل و شکیل -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-4 scale-95 transition-all duration-300 ease-out flex items-center gap-2 bg-white border border-slate-200 text-slate-800 px-4 py-3.5 rounded-xl shadow-[0_10px_35px_rgba(0,0,0,0.08)]">
+        <div class="p-1 bg-[#1E3CFF]/10 rounded-md text-[#1E3CFF]">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path d="m5 12 5 5L20 7"></path>
+            </svg>
+        </div>
+        <span class="text-xs font-bold text-slate-700">کد پیگیری با موفقیت کپی شد!</span>
+    </div>
+
+    <script>
+        // دکمه‌ها و عناصر تعاملی صفحه
+        const jalaliDateEl = document.getElementById('jalaliDate');
+
+        // تنظیم پویای تاریخ شمسی با استفاده از API پیش‌فرض و مدرن مرورگرها
+        try {
+            const today = new Date();
+            const formatter = new Intl.DateTimeFormat('fa-IR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            jalaliDateEl.textContent = formatter.format(today);
+        } catch (e) {
+            jalaliDateEl.textContent = new Date().toLocaleDateString('fa-IR');
+        }
+
+        // عملکرد کپی کردن امن کد رهگیری با سازگاری کامل در iframe ها
+        function copyTrackingCode(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text)
+                    .then(() => triggerToast())
+                    .catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        // سیستم جایگزین کپی برای سناریوهایی که کلیپ‌بورد مدرن در آی‌فریم در دسترس نیست
+        function fallbackCopy(text) {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            textarea.style.left = "-999999px";
+            textarea.style.top = "-999999px";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    triggerToast();
+                } else {
+                    console.error("خطا در کپی فیلبک");
+                }
+            } catch (err) {
+                console.error("عدم توانایی کپی با متد فیلبک", err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // نمایش پاپ‌آپ سفارشی زیبای کپی (Toast) بدون به کار بردن alert
+        function triggerToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0', 'translate-y-4', 'scale-95');
+            toast.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4', 'scale-95');
+                toast.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

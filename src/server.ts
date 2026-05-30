@@ -14,6 +14,9 @@ import {
 import { bot }
 from './telegram/bot-instance';
 
+import fs from 'fs';
+import path from 'path';
+
 const prisma = new PrismaClient();
 
 const app = express();
@@ -23,6 +26,10 @@ app.use(express.json());
 app.get('/', (_, res) => {
   res.send('🚀 AI Shared Backend Running');
 });
+
+app.use(
+  express.static('public')
+);
 
 
 app.get(
@@ -260,8 +267,35 @@ if (fullPool) {
 }
       
 
+let html = fs.readFileSync(
+  path.join(
+    process.cwd(),
+    'public',
+    'success.html'
+  ),
+  'utf8'
+);
+
+html = html.replace(
+  '{{POOL_CODE}}',
+  reservationResult.pool.code
+);
+
+html = html.replace(
+  '{{CURRENT_MEMBERS}}',
+  reservationResult.totalSeats.toString()
+);
+
+html = html.replace(
+  '{{CAPACITY}}',
+  reservationResult.product.capacity.toString()
+);
+
+res.send(html);
 
 
+
+/*
 
       res.send(`
 
@@ -335,6 +369,9 @@ href="https://t.me/@dimoonaiaccessbot"
 </body>
 </html>
 `);
+
+*/
+
 
 
     } catch (error) {
