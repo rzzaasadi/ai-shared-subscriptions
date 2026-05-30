@@ -59,6 +59,10 @@ import {
   handleUsers,
 } from './handlers/users';
 
+import {
+  isChannelMember
+} from './utils/channel';
+
 
 
 
@@ -71,6 +75,64 @@ const adminActivationSessions = new Map();
 
 
 bot.start(async (ctx) => {
+
+  await prisma.user.upsert({
+  where: {
+    telegramId: ctx.from.id.toString(),
+  },
+  update: {
+    firstName: ctx.from.first_name,
+    username: ctx.from.username,
+  },
+  create: {
+    telegramId: ctx.from.id.toString(),
+    firstName: ctx.from.first_name,
+    username: ctx.from.username,
+  },
+});
+
+  const joined =
+  await isChannelMember(
+    bot,
+    ctx.from.id
+  );
+
+if (!joined) {
+
+  await ctx.reply(
+`🚀 به Dimoon AI خوش اومدی
+
+در کانال Dimoon Labs آموزش‌های هوش مصنوعی، ابزارهای جدید، بروزرسانی سرویس‌ها و اطلاعیه‌های مهم منتشر میشه.
+
+⚡ ظرفیت اشتراک‌ها محدود است و ابتدا در کانال اطلاع‌رسانی می‌شود.
+
+📢 @dimoonlab
+
+بعد از عضویت روی «بررسی عضویت» بزن 👇`,
+{
+  reply_markup: {
+    inline_keyboard: [
+      [
+        {
+          text: '📢 عضویت در کانال',
+          url: 'https://t.me/dimoonlab'
+        }
+      ],
+      [
+        {
+          text: '✅ بررسی عضویت',
+          callback_data: 'check_join'
+        }
+      ]
+    ]
+  }
+}
+  );
+
+  return;
+
+}
+
   await ctx.reply(
     `🚀 به پلتفرم دسترسی اشتراکی ابزارهای AI خوش اومدی
 
@@ -84,6 +146,34 @@ Premium Shared Access to AI Tools
 });
 
 bot.hears('🛒 خرید اشتراک AI', async (ctx) => {
+
+  const user =
+  await prisma.user.findUnique({
+    where: {
+      telegramId:
+        ctx.from.id.toString(),
+    },
+  });
+
+if (!user?.phoneNumber) {
+
+  await ctx.reply(
+`📱 برای تکمیل خرید، شماره موبایل خود را ثبت کنید.
+
+این شماره فقط برای اطلاع‌رسانی سفارش‌ها، پشتیبانی و تمدید اشتراک استفاده می‌شود.`,
+    Markup.keyboard([
+      [
+        Markup.button.contactRequest(
+          '📱 ارسال شماره موبایل'
+        )
+      ],
+      ['⬅️ بازگشت']
+    ]).resize()
+  );
+
+  return;
+}
+
   userSessions.delete(ctx.from.id);
   const products = await prisma.product.findMany({
     where: {
@@ -427,6 +517,77 @@ bot.hears(
   }
 );
 
+bot.action(
+  'check_join',
+  async (ctx) => {
+
+    const joined =
+      await isChannelMember(
+        bot,
+        ctx.from.id
+      );
+
+    if (!joined) {
+
+      await ctx.answerCbQuery(
+        'هنوز عضو کانال نیستید'
+      );
+
+      return;
+    }
+
+    await ctx.reply(
+      `✅ عضویت شما تأیید شد`
+    );
+
+    await ctx.reply(
+      `🚀 به پلتفرم دسترسی اشتراکی ابزارهای AI خوش اومدی
+
+👇 یکی از گزینه‌ها رو انتخاب کن`,
+      mainMenuKeyboard
+    );
+
+  }
+);
+
+
+bot.on('contact', async (ctx) => {
+
+  await prisma.user.update({
+    where: {
+      telegramId:
+        ctx.from.id.toString(),
+    },
+    data: {
+      phoneNumber:
+        ctx.message.contact.phone_number,
+    },
+  });
+
+  const products =
+    await prisma.product.findMany({
+      where: {
+        isActive: true,
+      },
+    });
+
+  const buttons =
+    products.map(
+      (product) => [product.name]
+    );
+
+  buttons.push(['⬅️ بازگشت']);
+
+  await ctx.reply(
+`✅ شماره موبایل شما ثبت شد
+
+🤖 ابزارهای موجود`,
+    Markup.keyboard(
+      buttons
+    ).resize()
+  );
+
+});
 
 
 
