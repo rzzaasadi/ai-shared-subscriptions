@@ -191,15 +191,18 @@ if (!user?.phoneNumber) {
   );
 });
 
-bot.hears('⬅️ بازگشت', async (ctx) => {
+bot.hears('بازگشت', async (ctx) => {
   userSessions.delete(ctx.from.id);
+
+  const products = await prisma.product.findMany({
+    where: { isActive: true }
+  });
+
   await ctx.reply(
-    `🏠 Main Menu`,
-    Markup.keyboard([
-      ['🛒 خرید اشتراک AI'],
-      ['📦 اشتراک‌های من', '📡 وضعیت سرویس‌ها'],
-      ['🛟 پشتیبانی'],
-    ]).resize()
+    '🤖 ابزارهای موجود',
+    Markup.keyboard(
+      products.map(p => [p.name])
+    ).resize()
   );
 });
 
@@ -683,6 +686,8 @@ if (activePool) {
       ['بازگشت'],
     ]).resize()
   );
+
+
 });
   
 
