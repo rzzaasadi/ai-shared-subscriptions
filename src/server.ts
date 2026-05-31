@@ -27,6 +27,58 @@ app.get('/', (_, res) => {
   res.send('🚀 AI Shared Backend Running');
 });
 
+app.get(
+  '/admin/dashboard',
+  async (_, res) => {
+
+    const totalUsers =
+      await prisma.user.count();
+
+    const activeReservations =
+  await prisma.reservation.count({
+    where: {
+      status: 'CONFIRMED'
+    }
+  });
+
+    const activeSubscriptions =
+      await prisma.membership.count({
+        where: {
+          status: 'ACTIVE'
+        }
+      });
+
+    const readyPools =
+      await prisma.pool.count({
+        where: {
+          status: 'READY_TO_BUY'
+        }
+      });
+
+    const payments =
+      await prisma.payment.findMany({
+        where: {
+          status: 'SUCCESS'
+        }
+      });
+
+    const totalRevenue =
+      payments.reduce(
+        (sum, p) => sum + p.amount,
+        0
+      );
+
+    res.json({
+      totalUsers,
+      activeReservations,
+      activeSubscriptions,
+      readyPools,
+      totalRevenue
+    });
+
+  }
+);
+
 app.use(
   express.static('public')
 );
