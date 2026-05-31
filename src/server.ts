@@ -501,6 +501,28 @@ app.get('/admin/payments', async (_, res) => {
 });
 
 
+app.get('/admin/pools', async (_, res) => {
+
+  const pools = await prisma.pool.findMany({
+    orderBy: {
+      createdAt: 'desc'
+    },
+    include: {
+      product: true,
+      reservations: {
+        include: {
+          user: true
+        }
+      }
+    }
+  });
+
+  res.json(pools);
+
+});
+
+
+
 app.listen(3000, () => {
   console.log('🌐 Server running on port 3000');
 });
