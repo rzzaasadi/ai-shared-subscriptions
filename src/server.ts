@@ -466,9 +466,18 @@ href="https://t.me/@dimoonaiaccessbot"
 );
 
 
-app.listen(3000, () => {
-  console.log('🌐 Server running on port 3000');
+app.get('/admin/users', async (_, res) => {
+
+  const users = await prisma.user.findMany({
+    orderBy: {
+      createdAt: 'desc'
+    }
+  });
+
+  res.json(users);
+
 });
+
 
 app.get('/admin/payments', async (_, res) => {
 
@@ -486,3 +495,9 @@ app.get('/admin/payments', async (_, res) => {
   res.json(payments);
 
 });
+
+
+app.listen(3000, () => {
+  console.log('🌐 Server running on port 3000');
+});
+
