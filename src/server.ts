@@ -535,98 +535,63 @@ app.get('/admin/products', async (_, res) => {
 });
 
 
+// --- CREATE PRODUCT ---
 app.post('/admin/products', async (req, res) => {
   try {
-    const {
-  name,
-  price,
-  capacity,
-  isActive,
-  description
-} = req.body;
+    const { name, price, capacity, isActive, description } = req.body;
 
     const product = await prisma.product.create({
       data: {
-  name,
-  description,
-  price: Number(price),
-  capacity: Number(capacity),
-  isActive: Boolean(isActive),
-  codePrefix: name
-    .replace(/[^A-Za-z]/g, '')
-    .substring(0, 4)
-    .toUpperCase()
-}
-    });
-
-    res.json(product);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error: 'Failed to create product'
-    });
-  }
-});
-
-app.put('/admin/products/:id', async (req, res) => {
-  try {
-
-    const { id } = req.params;
-
-    const {
-      name,
-      price,
-      capacity,
-      isActive
-    } = req.body;
-
-    const product =
-      await prisma.product.update({
-        where: {
-          id
-        },
-        data: {
-          name,
-          price: Number(price),
-          capacity: Number(capacity),
-          isActive: Boolean(isActive)
-        }
-      });
-
-    res.json(product);
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      error: 'Failed to update product'
-    });
-  }
-});
-
-app.delete('/admin/products/:id', async (req, res) => {
-  try {
-
-    const { id } = req.params;
-
-    await prisma.product.delete({
-      where: {
-        id
+        name,
+        price: Number(price),
+        capacity: Number(capacity),
+        isActive: Boolean(isActive),
+        description,
+        codePrefix: name.replace(/[^A-Za-z]/g, '').substring(0, 4).toUpperCase()
       }
     });
 
-    res.json({
-      success: true
-    });
-
+    res.json(product);
   } catch (error) {
-
     console.error(error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
+});
 
-    res.status(500).json({
-      error: 'Failed to delete product'
+// --- UPDATE PRODUCT ---
+app.put('/admin/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, price, capacity, isActive, description } = req.body;
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        name,
+        price: Number(price),
+        capacity: Number(capacity),
+        isActive: Boolean(isActive),
+        description
+      }
     });
+
+    res.json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+// --- DELETE PRODUCT ---
+app.delete('/admin/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.product.delete({ where: { id } });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 });
 
