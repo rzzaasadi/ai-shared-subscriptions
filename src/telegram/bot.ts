@@ -680,6 +680,8 @@ if (activePool) {
 👥 ظرفیت کل: ${product.capacity} نفر
 🟢 ظرفیت باقی‌مانده گروه فعلی: ${remainingSeats} نفر
 
+📝 توضیحات: ${product.description || 'ندارد'}
+
 🪑 چند سیت می‌خواهید؟`,
     Markup.keyboard([
       buttons,
