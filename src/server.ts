@@ -521,7 +521,18 @@ app.get('/admin/pools', async (_, res) => {
 
 });
 
+app.get('/admin/products', async (_, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
 
+    res.json(products);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 app.listen(3000, () => {
   console.log('🌐 Server running on port 3000');
