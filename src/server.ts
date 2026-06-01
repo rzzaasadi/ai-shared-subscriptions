@@ -538,23 +538,25 @@ app.get('/admin/products', async (_, res) => {
 app.post('/admin/products', async (req, res) => {
   try {
     const {
-      name,
-      price,
-      capacity,
-      isActive
-    } = req.body;
+  name,
+  price,
+  capacity,
+  isActive,
+  description
+} = req.body;
 
     const product = await prisma.product.create({
       data: {
-        name,
-        price: Number(price),
-        capacity: Number(capacity),
-        isActive: Boolean(isActive),
-        codePrefix: name
-          .replace(/[^A-Za-z]/g, '')
-          .substring(0, 4)
-          .toUpperCase()
-      }
+  name,
+  description,
+  price: Number(price),
+  capacity: Number(capacity),
+  isActive: Boolean(isActive),
+  codePrefix: name
+    .replace(/[^A-Za-z]/g, '')
+    .substring(0, 4)
+    .toUpperCase()
+}
     });
 
     res.json(product);
