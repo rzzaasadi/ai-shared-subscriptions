@@ -210,7 +210,19 @@ bot.hears('📜 قوانین و سوالات متداول', async (ctx) => {
 `);
 });
 
-
+bot.hears('💬 پشتیبانی', async (ctx) => {
+  await ctx.reply(
+    'برای ارتباط با پشتیبانی روی دکمه زیر کلیک کنید:',
+    Markup.inlineKeyboard([
+      [
+        Markup.button.url(
+          '💬 ارتباط با پشتیبانی',
+          'https://t.me/dimoonadmin'
+        )
+      ]
+    ])
+  );
+});
 
 
 bot.hears('بازگشت', async (ctx) => {

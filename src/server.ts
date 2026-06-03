@@ -595,6 +595,72 @@ app.delete('/admin/products/:id', async (req, res) => {
   }
 });
 
+app.post('/admin/pools/:id/send-account', async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const {
+      email,
+      password,
+      expiry
+    } = req.body;
+
+    const pool = await prisma.pool.findUnique({
+      where: { id },
+      include: {
+        product: true,
+        reservations: {
+          include: {
+            user: true
+          }
+        }
+      }
+    });
+
+    if (!pool) {
+      return res.status(404).json({
+        error: 'Pool not found'
+      });
+    }
+
+    for (const reservation of pool.reservations) {
+
+      await bot.telegram.sendMessage(
+        reservation.user.telegramId,
+`🎉 اشتراک شما فعال شد
+
+🎬 ${pool.product.name}
+
+📧 ایمیل:
+${email}
+
+🔑 رمز عبور:
+${password}
+
+📅 تاریخ انقضا:
+${expiry}
+
+⚠️ لطفاً اطلاعات اکانت را در اختیار دیگران قرار ندهید.`
+      );
+
+    }
+
+    res.json({
+      success: true
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: 'Failed to send account details'
+    });
+
+  }
+});
+
 
 app.listen(3000, () => {
   console.log('🌐 Server running on port 3000');
