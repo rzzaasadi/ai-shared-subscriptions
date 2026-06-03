@@ -646,6 +646,7 @@ ${expiry}
 
     }
 
+    
     res.json({
       success: true
     });
@@ -739,11 +740,30 @@ app.post('/admin/broadcast', async (req, res) => {
       }
 
     }
+const adminId = process.env.ADMIN_TELEGRAM_ID;
+    if (adminId) {
 
-    res.json({
-      success: true,
-      sent
-    });
+  await bot.telegram.sendMessage(
+    adminId,
+`📢 پیام گروهی ارسال شد
+
+🎯 گروه هدف:
+${target}
+
+👥 تعداد ارسال موفق:
+${sent}
+
+📝 متن پیام:
+
+${message}`
+  );
+
+}
+
+res.json({
+  success: true,
+  sent
+});
 
   } catch (error) {
 
