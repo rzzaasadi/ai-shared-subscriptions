@@ -691,10 +691,13 @@ app.post('/admin/broadcast', async (req, res) => {
         });
 
       users = reservations.map(r => r.user);
+      
 
     }
 
     else if (target === 'expired_users') {
+
+      
 
       const reservations =
         await prisma.reservation.findMany({
@@ -711,6 +714,25 @@ app.post('/admin/broadcast', async (req, res) => {
       users = reservations.map(r => r.user);
 
     }
+    
+    else if (target.startsWith('buyers_')) {
+
+  const productId =
+    target.replace('buyers_', '');
+
+  const reservations =
+    await prisma.reservation.findMany({
+      where: {
+        productId
+      },
+      include: {
+        user: true
+      }
+    });
+
+  users = reservations.map(r => r.user);
+
+}
 
     const uniqueUsers =
       [...new Map(
