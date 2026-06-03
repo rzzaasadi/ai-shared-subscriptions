@@ -29,6 +29,10 @@ const app = express();
 
 import cors from 'cors';
 
+import {
+  processSuccessfulPayment
+} from './services/payment-processor';
+
 app.use(cors());
 
 app.use(express.json());
@@ -161,157 +165,35 @@ app.get(
   return res.send('Payment already verified');
 }
 
-
-      await prisma.payment.update({
-        where: {
-          id: payment.id,
-        },
-        data: {
-          status: 'SUCCESS',
-        },
-      });
-
-      const user =
-        await prisma.user.findUnique({
-          where: {
-            id: payment.userId,
-          },
-        });
-
-      if (!user) {
-
-        return res.send(
-          '❌ User Not Found'
-        );
-
-      }
+const reservationResult = await processSuccessfulPayment(payment);
 
 
-
-        console.log('START CREATE RESERVATION');
-
-      const reservationResult =  
-      await createReservation({
-
-        
-
-
-        telegramId:
-          user.telegramId,
-
-        firstName:
-          user.firstName || '',
-
-        username:
-          user.username || '',
-
-        productId:
-          payment.productId,
-
-        quantity:
-          payment.quantity,
-      });
-
-      console.log('RESERVATION CREATED');
-
-      await bot.telegram.sendMessage(
-  user.telegramId,
-  `✅ پرداخت شما با موفقیت ثبت شد
-
-🎬 ${reservationResult.product.name}
-🧩 ${reservationResult.pool.code}
-
-📊 وضعیت گروه:
-${reservationResult.totalSeats}/${reservationResult.product.capacity}
-
-⏳ منتظر تکمیل ظرفیت گروه باشید.
-
-📦 برای مشاهده وضعیت:
-اشتراک‌های من`
-);
-
-if (
-  reservationResult.totalSeats >=
-  reservationResult.product.capacity
-) {
-
-  // send group completed messages
-
+if (!reservationResult) {
+  return res.send(
+    'Payment already verified'
+  );
 }
 
-      
-await notifyAdminsNewPurchase(
-  bot,
-  {
-    poolCode:
-      reservationResult.pool.code,
-
-    productName:
-      reservationResult.product.name,
-
-    quantity:
-      payment.quantity,
-
-    totalSeats:
-      reservationResult.totalSeats,
-
-    capacity:
-      reservationResult.product.capacity,
-
-    firstName:
-      user.firstName || undefined,
-
-    userName:
-      user.username || undefined,
-  }
-);
-
-if (
-  reservationResult.totalSeats >=
-  reservationResult.product.capacity
-) {
-
-  await notifyAdminsPoolReady(
-    bot,
-    {
-      poolId:
-        reservationResult.pool.id,
-
-      poolCode:
-        reservationResult.pool.code,
-
-      productName:
-        reservationResult.product.name,
-
-      totalSeats:
-        reservationResult.totalSeats,
-
-      capacity:
-        reservationResult.product.capacity,
-    }
-  );
-
-  const fullPool =
-  await prisma.pool.findUnique({
-    where: {
-      id: reservationResult.pool.id,
-    },
-    include: {
-      reservations: {
-        include: {
-          user: true,
-        },
-      },
-    },
+if (reservationResult.totalSeats >= reservationResult.product.capacity) {
+  await notifyAdminsPoolReady(bot, {
+    poolId: reservationResult.pool.id,
+    poolCode: reservationResult.pool.code,
+    productName: reservationResult.product.name,
+    totalSeats: reservationResult.totalSeats,
+    capacity: reservationResult.product.capacity
   });
 
-if (fullPool) {
+  // پیام تکمیل گروه
+  const fullPool = await prisma.pool.findUnique({
+    where: { id: reservationResult.pool.id },
+    include: { reservations: { include: { user: true } } }
+  });
 
-  for (const reservation of fullPool.reservations) {
-
-    await bot.telegram.sendMessage(
-      reservation.user.telegramId,
-      `🎉 ظرفیت گروه تکمیل شد
+  if (fullPool) {
+    for (const reservation of fullPool.reservations) {
+      await bot.telegram.sendMessage(
+        reservation.user.telegramId,
+        `🎉 ظرفیت گروه تکمیل شد
 
 🎬 ${reservationResult.product.name}
 🧩 ${reservationResult.pool.code}
@@ -319,13 +201,9 @@ if (fullPool) {
 ✅ گروه آماده فعال‌سازی است.
 
 ⏳ اطلاعات ورود حداکثر تا 24 ساعت آینده ارسال خواهد شد.`
-    );
-
+      );
+    }
   }
-
-}
-
-
 }
       
 
@@ -355,110 +233,6 @@ html = html.replace(
 
 res.send(html);
 
-try {
-
-  await bot.telegram.sendMessage(
-    user.telegramId,
-    `✅ پرداخت شما با موفقیت ثبت شد
-
-🎬 ${reservationResult.product.name}
-
-🪑 تعداد سیت: ${payment.quantity}
-
-📦 سفارش شما ثبت شد و پس از تکمیل ظرفیت گروه، اطلاعات ورود از طریق ربات ارسال خواهد شد.
-
-برای مشاهده وضعیت:
-📦 اشتراک‌های من`
-  );
-
-} catch (error) {
-
-  console.log(
-    'TELEGRAM NOTIFICATION FAILED'
-  );
-
-  console.log(error);
-
-}
-
-
-
-/*
-
-      res.send(`
-
-<!DOCTYPE html>
-
-<html lang="fa" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>پرداخت موفق</title>
-
-<style>
-body{
-margin:0;
-font-family:tahoma;
-background:#0f172a;
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.card{
-background:#1e293b;
-padding:40px;
-border-radius:20px;
-text-align:center;
-max-width:500px;
-width:90%;
-}
-
-.btn{
-display:inline-block;
-margin-top:20px;
-padding:12px 24px;
-background:#22c55e;
-color:white;
-text-decoration:none;
-border-radius:10px;
-font-weight:bold;
-}
-</style>
-
-</head>
-
-<body>
-
-<div class="card">
-
-<h1>✅ پرداخت موفق</h1>
-
-<p>
-اشتراک شما با موفقیت ثبت شد.
-</p>
-
-<p>
-اطلاعات ورود از طریق ربات تلگرام ارسال خواهد شد.
-</p>
-
-<a
-class="btn"
-href="https://t.me/@dimoonaiaccessbot"
-
->
-
-بازگشت به ربات </a>
-
-</div>
-
-</body>
-</html>
-`);
-
-*/
 
 
 
