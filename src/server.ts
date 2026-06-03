@@ -17,6 +17,12 @@ from './telegram/bot-instance';
 import fs from 'fs';
 import path from 'path';
 
+import cron from 'node-cron';
+
+import {
+  recoverPendingPayments
+} from './jobs/payment-recovery';
+
 const prisma = new PrismaClient();
 
 const app = express();
@@ -799,7 +805,25 @@ res.json({
   }
 });
 
+cron.schedule(
+  '*/2 * * * *',
+  async () => {
 
+    try {
+
+      await recoverPendingPayments();
+
+    } catch (err) {
+
+      console.error(
+        'RECOVERY ERROR',
+        err
+      );
+
+    }
+
+  }
+);
 
 app.listen(3000, () => {
   console.log('🌐 Server running on port 3000');
