@@ -3,8 +3,8 @@ import { Markup } from 'telegraf';
 export const mainMenuKeyboard =
   Markup.keyboard([
     ['🛒 خرید اشتراک AI'],
-    ['📦 اشتراک‌های من', '📡 وضعیت سرویس‌ها'],
-    ['🛟 پشتیبانی'],
+    ['📦 اشتراک‌های من', '📜 قوانین و سوالات متداول'],
+    ['💬 پشتیبانی'],
   ]).resize();
 
 export const adminKeyboard =
