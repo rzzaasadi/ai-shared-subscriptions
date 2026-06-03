@@ -662,6 +662,102 @@ ${expiry}
 });
 
 
+app.post('/admin/broadcast', async (req, res) => {
+  try {
+
+    const { target, message } = req.body;
+
+    let users: any[] = [];
+
+    if (target === 'all_users') {
+
+      users = await prisma.user.findMany();
+
+    }
+
+    else if (target === 'active_users') {
+
+      const reservations =
+        await prisma.reservation.findMany({
+          where: {
+            pool: {
+              status: 'ACTIVE'
+            }
+          },
+          include: {
+            user: true
+          }
+        });
+
+      users = reservations.map(r => r.user);
+
+    }
+
+    else if (target === 'expired_users') {
+
+      const reservations =
+        await prisma.reservation.findMany({
+          where: {
+            pool: {
+              status: 'EXPIRED'
+            }
+          },
+          include: {
+            user: true
+          }
+        });
+
+      users = reservations.map(r => r.user);
+
+    }
+
+    const uniqueUsers =
+      [...new Map(
+        users.map(u => [u.id, u])
+      ).values()];
+
+    let sent = 0;
+
+    for (const user of uniqueUsers) {
+
+      try {
+
+        await bot.telegram.sendMessage(
+          user.telegramId,
+          message
+        );
+
+        sent++;
+
+      } catch (e) {
+
+        console.log(
+          'SEND FAILED',
+          user.telegramId
+        );
+
+      }
+
+    }
+
+    res.json({
+      success: true,
+      sent
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: 'Broadcast failed'
+    });
+
+  }
+});
+
+
+
 app.listen(3000, () => {
   console.log('🌐 Server running on port 3000');
 });
