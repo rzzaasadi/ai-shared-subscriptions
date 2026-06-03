@@ -30,6 +30,7 @@ export async function notifyAdminsPoolReady(
   });
 
   for (const admin of admins) {
+  console.log('SENDING POOL READY TO ADMIN', admin.telegramId); // <--- اینجا اضافه کن
 
   await bot.telegram.sendMessage(
     admin.telegramId,
@@ -43,20 +44,13 @@ export async function notifyAdminsPoolReady(
       reply_markup: {
         inline_keyboard: [
           [
-            {
-              text: '👥 اعضا',
-              callback_data: `members_${poolId}`,
-            },
-            {
-              text: '🔐 فعال‌سازی',
-              callback_data: `activate_${poolId}`,
-            },
+            { text: '👥 اعضا', callback_data: `members_${poolId}` },
+            { text: '🔐 فعال‌سازی', callback_data: `activate_${poolId}` },
           ],
         ],
       },
     }
   );
-
 }
   }
 
