@@ -740,11 +740,12 @@ app.post('/admin/broadcast', async (req, res) => {
       }
 
     }
-const adminId = process.env.ADMIN_TELEGRAM_ID;
-    if (adminId) {
+const adminIds =
+  process.env.ADMIN_IDS?.split(',') || [];
+    for (const adminId of adminIds) {
 
   await bot.telegram.sendMessage(
-    adminId,
+    adminId.trim(),
 `📢 پیام گروهی ارسال شد
 
 🎯 گروه هدف:
