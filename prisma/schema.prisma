@@ -57,6 +57,10 @@ model Product {
   description String?
   price       Int
   capacity    Int
+
+  maxPools    Int @default(1)
+
+  
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 

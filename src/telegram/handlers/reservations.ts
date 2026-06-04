@@ -5,8 +5,10 @@ import { PrismaClient } from '@prisma/client';
 import { createReservation }
 from '../services/reservations';
 
+
 import {
-  notifyAdminsPoolReady
+  notifyAdminsPoolReady,
+  notifyAdminsNewPurchase
 } from '../services/notifications';
 
 const prisma = new PrismaClient();
@@ -43,7 +45,12 @@ export async function handleSeatSelection(
         },
       });
 
-    if (!product) return;
+    if (!product) {
+  throw new Error('Product not found');
+}
+
+
+
     /*
     const result =
       await createReservation({
@@ -85,9 +92,27 @@ ${(product.price * quantity).toLocaleString()} تومان
   ])
 );
 
-return;
 
-  } finally {
+} catch (error: any) {
+
+  if (
+    error.message ===
+    'MAX_POOLS_REACHED'
+  ) {
+
+    await ctx.reply(
+      '⚠️ در حال حاضر ظرفیت همه گروه‌ها تکمیل است.\n\nدر صورت باز شدن ظرفیت به شما اطلاع داده خواهد شد.'
+    );
+
+    return;
+
+  }
+
+  throw error;
+
+
+
+} finally {
 
     processingUsers.delete(ctx.from.id);
 

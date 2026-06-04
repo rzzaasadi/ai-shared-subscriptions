@@ -69,6 +69,7 @@ export async function notifyAdminsPoolReady(
   }
 
 }
+}
 
 
 
@@ -128,7 +129,7 @@ ${params.capacity - params.totalSeats}`
   }
 
 }
-
+}
 
 export async function notifyUserPaymentSuccess(
   bot: Telegraf,
