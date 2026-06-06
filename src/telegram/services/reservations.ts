@@ -37,30 +37,22 @@ export async function createReservation(params: {
   // اگه pool پیدا نشد، ایجاد یک pool جدید
   if (!pool) {
 
-  const activePoolsCount =
-    await prisma.pool.count({
-      where: {
-        productId: product.id,
-        status: {
-          in: [
-            'FILLING',
-            'READY_TO_BUY',
-            'ACTIVE',
-          ],
-        },
-      },
-    });
+  const fillingPoolsCount =
+  await prisma.pool.count({
+    where: {
+      productId: product.id,
+      status: 'FILLING',
+    },
+  });
 
-  if (
-    activePoolsCount >=
-    product.maxPools
-  ) {
-
-    throw new Error(
-      'MAX_POOLS_REACHED'
-    );
-
-  }
+if (
+  fillingPoolsCount >=
+  product.maxPools
+) {
+  throw new Error(
+    'MAX_POOLS_REACHED'
+  );
+}
 
   const code = await generatePoolCode(
     product.codePrefix || 'POOL'

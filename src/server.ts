@@ -320,17 +320,25 @@ app.get('/admin/products', async (_, res) => {
 // --- CREATE PRODUCT ---
 app.post('/admin/products', async (req, res) => {
   try {
-    const { name, price, capacity, isActive, description } = req.body;
+    const {
+  name,
+  price,
+  capacity,
+  maxPools,
+  isActive,
+  description
+} = req.body;
 
     const product = await prisma.product.create({
       data: {
-        name,
-        price: Number(price),
-        capacity: Number(capacity),
-        isActive: Boolean(isActive),
-        description,
-        codePrefix: name.replace(/[^A-Za-z]/g, '').substring(0, 4).toUpperCase()
-      }
+  name,
+  price: Number(price),
+  capacity: Number(capacity),
+  maxPools: Number(maxPools),
+  isActive: Boolean(isActive),
+  description,
+  codePrefix: name.replace(/[^A-Za-z]/g, '').substring(0, 4).toUpperCase()
+}
     });
 
     res.json(product);
@@ -344,17 +352,26 @@ app.post('/admin/products', async (req, res) => {
 app.put('/admin/products/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, capacity, isActive, description } = req.body;
+    const {
+  name,
+  price,
+  capacity,
+  maxPools,
+  isActive,
+  description
+} = req.body;
 
     const product = await prisma.product.update({
       where: { id },
       data: {
-        name,
-        price: Number(price),
-        capacity: Number(capacity),
-        isActive: Boolean(isActive),
-        description
-      }
+  name,
+  price: Number(price),
+  capacity: Number(capacity),
+  maxPools: Number(maxPools),
+  isActive: Boolean(isActive),
+  description,
+  codePrefix: name.replace(/[^A-Za-z]/g, '').substring(0, 4).toUpperCase()
+}
     });
 
     res.json(product);

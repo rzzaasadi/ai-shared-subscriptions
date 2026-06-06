@@ -151,6 +151,8 @@ bot.hears('🛒 خرید اشتراک AI', async (ctx) => {
     },
   });
 
+
+  /*
 if (!user?.phoneNumber) {
 
   await ctx.reply(
@@ -169,6 +171,8 @@ if (!user?.phoneNumber) {
 
   return;
 }
+*/
+
 
   userSessions.delete(ctx.from.id);
   const products = await prisma.product.findMany({
@@ -719,13 +723,13 @@ if (activePool) {
   await ctx.reply(
     `🎬 ${product.name} اشتراکی
 
-💰 قیمت هر سیت: ${product.price.toLocaleString()} تومان
+💰 قیمت هر سهم: ${product.price.toLocaleString()} تومان
 👥 ظرفیت کل: ${product.capacity} نفر
 🟢 ظرفیت باقی‌مانده گروه فعلی: ${remainingSeats} نفر
 
 📝 توضیحات: ${product.description || 'ندارد'}
 
-🪑 چند سیت می‌خواهید؟`,
+🪑 چند جای خالی می‌خواهید؟`,
     Markup.keyboard([
       buttons,
       ['بازگشت'],
